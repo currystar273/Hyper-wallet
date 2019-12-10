@@ -1,0 +1,50 @@
+<html>
+<head>
+  <script src="https://{website}/rest/widgets/transfer-methods/{user-token}/{language}.min.js" />
+</head>
+
+<body>
+  <div id="TMWidget"></div>
+
+    <script type="text/javascript">
+    HWWidgets.initialize((onSuccess, onFailure) => {
+        issueAuthenticationToken((resp) => {
+            onSuccess(resp.value);
+        });
+    });
+
+    HWWidgets.transferMethods.configure({
+        "template": "bootstrap3",
+        "el": document.getElementById("TMWidget"),
+        "onComplete": function(trmObject, completionResult) {
+          // redirect payee to another page with the result and token
+            var token = trmObject.token;
+            var redirect = "www.yoursite.com";
+            var url = `http://${redirect}?result=${completionResult}&token={token}`;
+            window.location = url;
+        }
+    }).display(function () {
+      //this is a callback event called when display is done
+    });
+
+    // Example implementation of `getAuthenticationToken`
+    function getAuthenticationToken(callback) {
+        $.ajax({
+            url: `https://{yourServer}/{yourAuthenticationEndpoint}`, 
+            method: 'POST',
+            dataType: 'json',
+            beforeSend: function(xhrObj){
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Accept","application/json"); },
+              success: function( data, txtStatus, xhr ) {
+                  callback(data);
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                  console.log(jqXHR, textStatus, errorThrown);
+                  callback(null, errorThrown);
+            }
+        });
+    }
+  </script>
+</body>
+</html>
